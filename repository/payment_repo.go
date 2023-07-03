@@ -9,7 +9,7 @@ type PaymentRepository interface {
 	Create(order entity.Payment) (entity.Payment, error)
 	ShowPaidOrder() ([]entity.Payment, error)
 	GetById(id string) (entity.Payment, error)
-	UpdatePayment(id string, paymentStatus bool, transacStatus string) (entity.Payment, error)
+	UpdatePayment(id string, paymentStatus bool, transacStatus string, paymentLink string) error
 }
 
 type paymentRepository struct {
@@ -43,17 +43,14 @@ func (pr *paymentRepository) GetById(id string) (entity.Payment, error) {
 	return result, nil
 }
 
-func (pr *paymentRepository) UpdatePayment(id string, paymentStatus bool, transacStatus string) (entity.Payment, error) {
+func (pr *paymentRepository) UpdatePayment(id string, paymentStatus bool, transacStatus string, link string) error {
 	var order entity.Payment
-	if err := pr.db.Model(&order).Updates(map[string]interface{}{
+	if err := pr.db.Model(&order).Where("id = ?", id).Updates(map[string]interface{}{
 		"is_paid":            paymentStatus,
 		"transaction_status": transacStatus,
+		"payment_link":       link,
 	}).Error; err != nil {
-		return entity.Payment{}, err
+		return err
 	}
-	if err := pr.db.First(&order, id).Error; err != nil {
-		return order, err
-
-	}
-	return order, nil
+	return nil
 }

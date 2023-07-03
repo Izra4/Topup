@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"math/rand"
+	"strconv"
 	"time"
 )
 
@@ -96,7 +97,7 @@ func (ph *PaymentHandler) ShowPaidOrder(c *gin.Context) {
 	sdk.Success(c, 200, "Success to get data", orders)
 }
 
-func (ph *PaymentHandler) ShowOrderById(c *gin.Context) {
+func (ph *PaymentHandler) ShowOrderByIdAdmin(c *gin.Context) {
 	idOrder := c.Param("id")
 	fmt.Println(idOrder)
 	order, err := ph.PaymentService.GetById("#" + idOrder)
@@ -105,6 +106,68 @@ func (ph *PaymentHandler) ShowOrderById(c *gin.Context) {
 		return
 	}
 	sdk.Success(c, 200, "Data loaded", order)
+}
+
+type orderReq struct {
+	Id string `json:"id" binding:"required"`
+}
+
+func (ph *PaymentHandler) ShowOrderByIdUser(c *gin.Context) {
+	var req orderReq
+	if err := c.ShouldBindJSON(&req); err != nil {
+		sdk.FailOrError(c, 400, "Please input the id that you want to check", err)
+	}
+	fmt.Println(req.Id)
+	result, err := ph.PaymentService.GetById(req.Id)
+	if err != nil {
+		sdk.FailOrError(c, 400, "Order with id: "+req.Id+"isn't exist", err)
+		return
+	}
+	fmt.Println("Clear")
+	sdk.Success(c, 200, "Data Found", result)
+}
+
+func (ph *PaymentHandler) Payment(c *gin.Context) {
+	id := c.Param("id")
+	id = "#" + id
+
+	isPaid, ok := strconv.ParseBool(c.PostForm("is_paid"))
+	if ok != nil {
+		sdk.FailOrError(c, 500, "Failed to convert boolean", ok)
+		return
+	}
+
+	transacStatus := c.PostForm("status")
+	if transacStatus == "" {
+		sdk.Fail(c, 400, "Failed to get new transaction status")
+		return
+	}
+
+	err := ph.PaymentService.UpdatePayment(id, isPaid, transacStatus, "")
+	if err != nil {
+		sdk.FailOrError(c, 500, "payment failed", err)
+		return
+	}
+
+	//file, err := c.FormFile("file")
+	//if err != nil {
+	//	sdk.FailOrError(c, http.StatusBadRequest, "Failed to get file", err)
+	//	return
+	//}
+	res := result{
+		Id:          id,
+		IsPaid:      isPaid,
+		TransStatus: transacStatus,
+		Link:        "",
+	}
+	sdk.Success(c, 200, "Succes to pay", res)
+}
+
+type result struct {
+	Id          string `json:"id"`
+	IsPaid      bool   `json:"is_paid"`
+	TransStatus string `json:"trans_status"`
+	Link        string `json:"link"`
 }
 
 func generateOrderID() string {

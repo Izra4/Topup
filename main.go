@@ -6,8 +6,11 @@ import (
 	"TopUpWEb/initializers"
 	"TopUpWEb/repository"
 	"TopUpWEb/service"
+	"fmt"
 	"github.com/gin-gonic/gin"
+	storage_go "github.com/supabase-community/storage-go"
 	"gorm.io/gorm"
+	"os"
 )
 
 func init() {
@@ -52,13 +55,25 @@ func main() {
 	bookingHandler := BookingHandler(db)
 	paymentHandler := PaymentHandler(db)
 
+	client := storage_go.NewClient(os.Getenv("PROJECT_URL"), "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdtbGNzbWl2aG1kanhpc3FjeXJ3Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTY4ODM3NjQ2NywiZXhwIjoyMDAzOTUyNDY3fQ.ypOZNGNqPHWd57crJPDHsClq3s5-GZ1_JnGrDJl-IZ4", nil)
+	fmt.Println(client.ListBuckets())
+	file, err := os.Open("C:\\Users\\INTEL\\Documents\\lol.txt")
+	if err != nil {
+		panic(err)
+	}
+
+	resp := client.UploadFile("Link_Bayar", "file.txt", file)
+	fmt.Println("respon: ", resp)
+
 	r := gin.Default()
 	r.GET("/games", gameHandler.GetAllGames)
 	r.GET("/games/:id", gameHandler.GetGamebyID)
 	r.GET("/booking-details", bookingHandler.ShowLatestBooking)
 	r.GET("/orders-list", paymentHandler.ShowPaidOrder)
-	r.GET("/orders-list/:id", paymentHandler.ShowOrderById)
+	r.GET("/orders-list/:id", paymentHandler.ShowOrderByIdAdmin)
+	r.GET("/order-status", paymentHandler.ShowOrderByIdUser)
 	r.POST("/booking/:id", bookingHandler.CreateBooking)
 	r.POST("/order", paymentHandler.CreateOrder)
+	r.POST("/order/pay/:id", paymentHandler.Payment)
 	r.Run()
 }

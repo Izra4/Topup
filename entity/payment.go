@@ -17,7 +17,7 @@ type Payment struct {
 	PaymentStatus     bool      `gorm:"column:is_paid;default:false" json:"payment_status"`
 	TransactionStatus string    `gorm:"type:VARCHAR(15);NOT NULL" json:"transaction_status"`
 	PaymentLink       string    `gorm:"type:TEXT;NOT NULL" json:"payment_link"`
-	BookingId         uint
+	BookingId         uint      `gorm:"unique" json:"booking_id"`
 }
 
 type PaymentReq struct {
