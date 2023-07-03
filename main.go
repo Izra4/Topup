@@ -6,7 +6,6 @@ import (
 	"TopUpWEb/initializers"
 	"TopUpWEb/repository"
 	"TopUpWEb/service"
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
@@ -48,7 +47,6 @@ func PaymentHandler(db *gorm.DB) *handler.PaymentHandler {
 }
 
 func main() {
-	fmt.Println("Hello")
 	db := database.InitDB()
 	gameHandler := GameHandler(db)
 	bookingHandler := BookingHandler(db)
@@ -58,6 +56,8 @@ func main() {
 	r.GET("/games", gameHandler.GetAllGames)
 	r.GET("/games/:id", gameHandler.GetGamebyID)
 	r.GET("/booking-details", bookingHandler.ShowLatestBooking)
+	r.GET("/orders-list", paymentHandler.ShowPaidOrder)
+	r.GET("/orders-list/:id", paymentHandler.ShowOrderById)
 	r.POST("/booking/:id", bookingHandler.CreateBooking)
 	r.POST("/order", paymentHandler.CreateOrder)
 	r.Run()

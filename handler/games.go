@@ -39,7 +39,7 @@ func (h *GamesHandler) GetAllGames(c *gin.Context) {
 		results = append(results, result)
 	}
 
-	sdk.Success(c, http.StatusOK, "Games loaded	", results)
+	sdk.Success(c, http.StatusOK, "Games loaded", results)
 }
 
 type gameByIdResult struct {

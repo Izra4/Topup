@@ -64,6 +64,49 @@ func (ph *PaymentHandler) CreateOrder(c *gin.Context) {
 	sdk.Success(c, 200, "Success to create order data", createdOrder)
 }
 
+type orderList struct {
+	Id             string `json:"id"`
+	Name           string `json:"name"`
+	JenisPaket     string `json:"jenis_paket"`
+	PaymentMeethod string `json:"payment_meethod"`
+}
+
+func (ph *PaymentHandler) ShowPaidOrder(c *gin.Context) {
+	paidOrder, err := ph.PaymentService.ShowPaidOrder()
+	if err != nil {
+		sdk.FailOrError(c, 500, "Failed to load", err)
+		return
+	}
+	if paidOrder == nil {
+		sdk.Success(c, 200, "No orders paid", paidOrder)
+		return
+	}
+
+	var orders []orderList
+	for _, order := range paidOrder {
+		paid := orderList{
+			Id:             order.ID,
+			Name:           order.Name,
+			JenisPaket:     order.JenisPaket,
+			PaymentMeethod: order.PaymentMethod,
+		}
+		orders = append(orders, paid)
+	}
+
+	sdk.Success(c, 200, "Success to get data", orders)
+}
+
+func (ph *PaymentHandler) ShowOrderById(c *gin.Context) {
+	idOrder := c.Param("id")
+	fmt.Println(idOrder)
+	order, err := ph.PaymentService.GetById("#" + idOrder)
+	if err != nil {
+		sdk.FailOrError(c, 500, "Failed to load data", err)
+		return
+	}
+	sdk.Success(c, 200, "Data loaded", order)
+}
+
 func generateOrderID() string {
 	// Generate random number with 8 characters
 	randSource := rand.NewSource(time.Now().UnixNano())

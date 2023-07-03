@@ -8,7 +8,8 @@ import (
 type PaymentRepository interface {
 	Create(order entity.Payment) (entity.Payment, error)
 	ShowPaidOrder() ([]entity.Payment, error)
-	GetById(id uint) (entity.Payment, error)
+	GetById(id string) (entity.Payment, error)
+	UpdatePayment(id string, paymentStatus bool, transacStatus string) (entity.Payment, error)
 }
 
 type paymentRepository struct {
@@ -34,10 +35,25 @@ func (pr *paymentRepository) ShowPaidOrder() ([]entity.Payment, error) {
 	return result, nil
 }
 
-func (pr *paymentRepository) GetById(id uint) (entity.Payment, error) {
+func (pr *paymentRepository) GetById(id string) (entity.Payment, error) {
 	var result entity.Payment
-	if err := pr.db.First(&result, id).Error; err != nil {
+	if err := pr.db.First(&result, "id = ?", id).Error; err != nil {
 		return entity.Payment{}, err
 	}
 	return result, nil
+}
+
+func (pr *paymentRepository) UpdatePayment(id string, paymentStatus bool, transacStatus string) (entity.Payment, error) {
+	var order entity.Payment
+	if err := pr.db.Model(&order).Updates(map[string]interface{}{
+		"is_paid":            paymentStatus,
+		"transaction_status": transacStatus,
+	}).Error; err != nil {
+		return entity.Payment{}, err
+	}
+	if err := pr.db.First(&order, id).Error; err != nil {
+		return order, err
+
+	}
+	return order, nil
 }

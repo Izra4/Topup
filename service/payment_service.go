@@ -9,7 +9,8 @@ import (
 type PaymentService interface {
 	Create(order entity.PaymentReq) (entity.Payment, error)
 	ShowPaidOrder() ([]entity.Payment, error)
-	GetById(id uint) (entity.Payment, error)
+	GetById(id string) (entity.Payment, error)
+	UpdatePayment(paymentID string, isPaid bool, transactionStatus string) (entity.Payment, error)
 }
 
 type paymentService struct {
@@ -48,6 +49,10 @@ func (ps *paymentService) ShowPaidOrder() ([]entity.Payment, error) {
 	return ps.PaymentRepo.ShowPaidOrder()
 }
 
-func (ps *paymentService) GetById(id uint) (entity.Payment, error) {
+func (ps *paymentService) GetById(id string) (entity.Payment, error) {
 	return ps.PaymentRepo.GetById(id)
+}
+
+func (ps *paymentService) UpdatePayment(paymentID string, isPaid bool, transactionStatus string) (entity.Payment, error) {
+	return ps.PaymentRepo.UpdatePayment(paymentID, isPaid, transactionStatus)
 }
