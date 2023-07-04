@@ -7,7 +7,10 @@ import (
 	"TopUpWEb/service"
 	"fmt"
 	"github.com/gin-gonic/gin"
+	storage_go "github.com/supabase-community/storage-go"
 	"math/rand"
+	"net/http"
+	"os"
 	"strconv"
 	"time"
 )
@@ -105,26 +108,60 @@ func (ph *PaymentHandler) ShowOrderByIdAdmin(c *gin.Context) {
 		sdk.FailOrError(c, 500, "Failed to load data", err)
 		return
 	}
-	sdk.Success(c, 200, "Data loaded", order)
+	client := getClient()
+	link := client.GetPublicUrl("Link_Bayar", order.PaymentLink)
+	results := entity.PaymentRes{
+		ID:                order.ID,
+		Created_time:      order.CreatedAt,
+		Name:              order.Name,
+		Jenis_paket:       order.JenisPaket,
+		UserId:            order.UserId,
+		PaymentMethod:     order.PaymentMethod,
+		NomorVA:           order.NomorVA,
+		NameAcc:           order.NameAcc,
+		PaymentStatus:     order.PaymentStatus,
+		TransactionStatus: order.TransactionStatus,
+		PaymentLink:       link.SignedURL,
+	}
+	sdk.Success(c, 200, "Data loaded", results)
 }
 
-type orderReq struct {
+type idReq struct {
 	Id string `json:"id" binding:"required"`
 }
 
 func (ph *PaymentHandler) ShowOrderByIdUser(c *gin.Context) {
-	var req orderReq
+	var req idReq
 	if err := c.ShouldBindJSON(&req); err != nil {
 		sdk.FailOrError(c, 400, "Please input the id that you want to check", err)
 	}
-	fmt.Println(req.Id)
-	result, err := ph.PaymentService.GetById(req.Id)
+
+	results, err := ph.PaymentService.GetById(req.Id)
 	if err != nil {
 		sdk.FailOrError(c, 400, "Order with id: "+req.Id+"isn't exist", err)
 		return
 	}
-	fmt.Println("Clear")
-	sdk.Success(c, 200, "Data Found", result)
+	linkStr := ""
+	if results.PaymentLink != "" {
+		client := getClient()
+		link := client.GetPublicUrl("Link_Bayar", results.PaymentLink)
+		linkStr = link.SignedURL
+	}
+
+	res := entity.PaymentRes{
+		ID:                results.ID,
+		Created_time:      results.CreatedAt,
+		Name:              results.Name,
+		Jenis_paket:       results.JenisPaket,
+		UserId:            results.UserId,
+		PaymentMethod:     results.PaymentMethod,
+		NomorVA:           results.NomorVA,
+		NameAcc:           results.NameAcc,
+		PaymentStatus:     results.PaymentStatus,
+		TransactionStatus: results.TransactionStatus,
+		PaymentLink:       linkStr,
+	}
+	sdk.Success(c, 200, "Data Found", res)
 }
 
 func (ph *PaymentHandler) Payment(c *gin.Context) {
@@ -136,29 +173,44 @@ func (ph *PaymentHandler) Payment(c *gin.Context) {
 		sdk.FailOrError(c, 500, "Failed to convert boolean", ok)
 		return
 	}
-
+	_, err := ph.PaymentService.GetById(id)
+	if err != nil {
+		sdk.FailOrError(c, 500, "Data not found", err)
+		return
+	}
 	transacStatus := c.PostForm("status")
 	if transacStatus == "" {
 		sdk.Fail(c, 400, "Failed to get new transaction status")
 		return
 	}
 
-	err := ph.PaymentService.UpdatePayment(id, isPaid, transacStatus, "")
+	file, err := c.FormFile("file")
 	if err != nil {
-		sdk.FailOrError(c, 500, "payment failed", err)
+		sdk.FailOrError(c, http.StatusBadRequest, "Failed to get file", err)
 		return
 	}
 
-	//file, err := c.FormFile("file")
-	//if err != nil {
-	//	sdk.FailOrError(c, http.StatusBadRequest, "Failed to get file", err)
-	//	return
-	//}
+	fileContent, err := file.Open()
+	if err != nil {
+		sdk.FailOrError(c, http.StatusInternalServerError, "Failed to open file", err)
+		return
+	}
+	defer fileContent.Close()
+
+	client := getClient()
+	fileName := randString()
+	resp := client.UploadFile("Link_Bayar", fileName, fileContent)
+	fmt.Println(resp)
 	res := result{
 		Id:          id,
 		IsPaid:      isPaid,
 		TransStatus: transacStatus,
-		Link:        "",
+		Link:        fileName,
+	}
+	err = ph.PaymentService.UpdatePayment(id, isPaid, transacStatus, fileName)
+	if err != nil {
+		sdk.FailOrError(c, 500, "payment failed", err)
+		return
 	}
 	sdk.Success(c, 200, "Succes to pay", res)
 }
@@ -170,6 +222,55 @@ type result struct {
 	Link        string `json:"link"`
 }
 
+func (ph *PaymentHandler) ConfirmOrder(c *gin.Context) {
+	id := c.Param("id")
+	id = "#" + id
+
+	status := c.PostForm("status")
+	if status == "" {
+		sdk.Fail(c, 500, "Failed to get status")
+		return
+	}
+	if err := ph.PaymentService.OrderConfirm(id, status); err != nil {
+		sdk.FailOrError(c, 500, "Failed to update status", err)
+		return
+	}
+	res := orderResult{
+		ID:     id,
+		Status: status,
+	}
+	sdk.Success(c, 200, "Order success", res)
+}
+
+func (ph *PaymentHandler) DeleteOrderAdmin(c *gin.Context) {
+	id := c.Param("id")
+	id = "#" + id
+	data, err := ph.PaymentService.DeleteOrder(id)
+	if err != nil {
+		sdk.FailOrError(c, 500, "Failed to delete", err)
+		return
+	}
+	sdk.Success(c, 200, "Order with id "+id+" deleted", data)
+}
+func (ph *PaymentHandler) DeleteOrderUser(c *gin.Context) {
+	var req idReq
+	if err := c.ShouldBindJSON(&req); err != nil {
+		sdk.FailOrError(c, 400, "Please input the id that you want to delete", err)
+		return
+	}
+	data, err := ph.PaymentService.DeleteOrder(req.Id)
+	if err != nil {
+		sdk.FailOrError(c, 500, "Failed to delete", err)
+		return
+	}
+	sdk.Success(c, 200, "Order with id: "+req.Id+" deleted", data)
+}
+
+type orderResult struct {
+	ID     string `json:"id"`
+	Status string `json:"status"`
+}
+
 func generateOrderID() string {
 	// Generate random number with 8 characters
 	randSource := rand.NewSource(time.Now().UnixNano())
@@ -178,4 +279,21 @@ func generateOrderID() string {
 
 	orderID := "#INV" + randNum
 	return orderID
+}
+
+func getClient() *storage_go.Client {
+	client := storage_go.NewClient(os.Getenv("PROJECT_URL"), os.Getenv("PROJECT_API"), nil)
+	return client
+}
+
+func randString() string {
+	const chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ123456789"
+	randSeed := rand.New(rand.NewSource(time.Now().UnixNano()))
+
+	b := make([]byte, 8)
+	for i := range b {
+		b[i] = chars[randSeed.Intn(len(chars))]
+	}
+
+	return string(b)
 }

@@ -10,6 +10,8 @@ type PaymentRepository interface {
 	ShowPaidOrder() ([]entity.Payment, error)
 	GetById(id string) (entity.Payment, error)
 	UpdatePayment(id string, paymentStatus bool, transacStatus string, paymentLink string) error
+	OrderConfirm(id string, transacStatus string) error
+	DeleteOrder(id string) (entity.Payment, error)
 }
 
 type paymentRepository struct {
@@ -53,4 +55,25 @@ func (pr *paymentRepository) UpdatePayment(id string, paymentStatus bool, transa
 		return err
 	}
 	return nil
+}
+
+func (pr *paymentRepository) OrderConfirm(id string, transacStatus string) error {
+	var order entity.Payment
+	if err := pr.db.Model(&order).Where("id = ?", id).Updates(map[string]interface{}{
+		"transaction_status": transacStatus,
+	}).Error; err != nil {
+		return err
+	}
+	return nil
+}
+
+func (pr *paymentRepository) DeleteOrder(id string) (entity.Payment, error) {
+	var order entity.Payment
+	if err := pr.db.First(&order, id).Error; err != nil {
+		return order, err
+	}
+	if err := pr.db.Delete(&order).Error; err != nil {
+		return order, err
+	}
+	return order, nil
 }

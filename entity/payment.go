@@ -20,6 +20,20 @@ type Payment struct {
 	BookingId         uint      `gorm:"unique" json:"booking_id"`
 }
 
+type PaymentRes struct {
+	ID                string    `json:"id"`
+	Created_time      time.Time `json:"created_time"`
+	Name              string    `json:"name"`
+	Jenis_paket       string    `json:"jenis_paket"`
+	UserId            string    `json:"user_id"`
+	PaymentMethod     string    `json:"payment_method"`
+	NomorVA           string    `json:"nomor_va"`
+	NameAcc           string    `json:"name_acc"`
+	PaymentStatus     bool      `json:"payment_status"`
+	TransactionStatus string    `json:"transaction_status"`
+	PaymentLink       string    `json:"payment_link"`
+}
+
 type PaymentReq struct {
 	ID                string `json:"id"`
 	Name              string `json:"name"`

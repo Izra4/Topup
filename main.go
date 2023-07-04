@@ -6,11 +6,9 @@ import (
 	"TopUpWEb/initializers"
 	"TopUpWEb/repository"
 	"TopUpWEb/service"
-	"fmt"
 	"github.com/gin-gonic/gin"
 	storage_go "github.com/supabase-community/storage-go"
 	"gorm.io/gorm"
-	"os"
 )
 
 func init() {
@@ -49,21 +47,15 @@ func PaymentHandler(db *gorm.DB) *handler.PaymentHandler {
 	return paymentHandler
 }
 
+func initSupabase(client *storage_go.Client) {
+	return
+}
+
 func main() {
 	db := database.InitDB()
 	gameHandler := GameHandler(db)
 	bookingHandler := BookingHandler(db)
 	paymentHandler := PaymentHandler(db)
-
-	client := storage_go.NewClient(os.Getenv("PROJECT_URL"), "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdtbGNzbWl2aG1kanhpc3FjeXJ3Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTY4ODM3NjQ2NywiZXhwIjoyMDAzOTUyNDY3fQ.ypOZNGNqPHWd57crJPDHsClq3s5-GZ1_JnGrDJl-IZ4", nil)
-	fmt.Println(client.ListBuckets())
-	file, err := os.Open("C:\\Users\\INTEL\\Documents\\lol.txt")
-	if err != nil {
-		panic(err)
-	}
-
-	resp := client.UploadFile("Link_Bayar", "file.txt", file)
-	fmt.Println("respon: ", resp)
 
 	r := gin.Default()
 	r.GET("/games", gameHandler.GetAllGames)
@@ -74,6 +66,10 @@ func main() {
 	r.GET("/order-status", paymentHandler.ShowOrderByIdUser)
 	r.POST("/booking/:id", bookingHandler.CreateBooking)
 	r.POST("/order", paymentHandler.CreateOrder)
-	r.POST("/order/pay/:id", paymentHandler.Payment)
+	r.PATCH("/order/pay/:id", paymentHandler.Payment)
+	r.PATCH("/order/confirm-order/:id", paymentHandler.ConfirmOrder)
+	r.DELETE("/admin-delete/:id", paymentHandler.DeleteOrderAdmin)
+	r.DELETE("user-delete", paymentHandler.DeleteOrderUser)
+
 	r.Run()
 }
