@@ -7,9 +7,7 @@ import (
 	"TopUpWEb/repository"
 	"TopUpWEb/service"
 	"github.com/gin-gonic/gin"
-	"github.com/joho/godotenv"
 	"gorm.io/gorm"
-	"log"
 )
 
 func init() {
@@ -48,11 +46,11 @@ func PaymentHandler(db *gorm.DB) *handler.PaymentHandler {
 }
 
 func main() {
-	err := godotenv.Load()
-
-	if err != nil {
-		log.Fatalln("Failed to load env file")
-	}
+	//err := godotenv.Load()
+	//
+	//if err != nil {
+	//	log.Fatalln("Failed to load env file")
+	//}
 	db := database.InitDB()
 	gameHandler := GameHandler(db)
 	bookingHandler := BookingHandler(db)
