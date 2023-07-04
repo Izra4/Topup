@@ -9,6 +9,8 @@ type PaymentRepository interface {
 	Create(order entity.Payment) (entity.Payment, error)
 	ShowPaidOrder() ([]entity.Payment, error)
 	GetById(id string) (entity.Payment, error)
+	GetOrderByDoneStatus() ([]entity.Payment, error)
+	GetOrderByProcessStatus() ([]entity.Payment, error)
 	UpdatePayment(id string, paymentStatus bool, transacStatus string, paymentLink string) error
 	OrderConfirm(id string, transacStatus string) error
 	DeleteOrder(id string) (entity.Payment, error)
@@ -27,14 +29,6 @@ func (pr *paymentRepository) Create(order entity.Payment) (entity.Payment, error
 		return entity.Payment{}, err
 	}
 	return order, nil
-}
-
-func (pr *paymentRepository) ShowPaidOrder() ([]entity.Payment, error) {
-	var result []entity.Payment
-	if err := pr.db.Where("is_paid = ?", true).Find(&result).Error; err != nil {
-		return nil, err
-	}
-	return result, nil
 }
 
 func (pr *paymentRepository) GetById(id string) (entity.Payment, error) {
@@ -69,11 +63,35 @@ func (pr *paymentRepository) OrderConfirm(id string, transacStatus string) error
 
 func (pr *paymentRepository) DeleteOrder(id string) (entity.Payment, error) {
 	var order entity.Payment
-	if err := pr.db.First(&order, id).Error; err != nil {
+	if err := pr.db.First(&order, "id = ?", id).Error; err != nil {
 		return order, err
 	}
 	if err := pr.db.Delete(&order).Error; err != nil {
 		return order, err
 	}
 	return order, nil
+}
+
+func (pr *paymentRepository) ShowPaidOrder() ([]entity.Payment, error) {
+	var result []entity.Payment
+	if err := pr.db.Where("is_paid = ?", true).Find(&result).Error; err != nil {
+		return nil, err
+	}
+	return result, nil
+}
+
+func (pr *paymentRepository) GetOrderByDoneStatus() ([]entity.Payment, error) {
+	var result []entity.Payment
+	if err := pr.db.Where("transaction_status = ?", "Selesai").Find(&result).Error; err != nil {
+		return nil, err
+	}
+	return result, nil
+}
+
+func (pr *paymentRepository) GetOrderByProcessStatus() ([]entity.Payment, error) {
+	var result []entity.Payment
+	if err := pr.db.Where("transaction_status = ?", "Sedang Proses").Find(&result).Error; err != nil {
+		return nil, err
+	}
+	return result, nil
 }

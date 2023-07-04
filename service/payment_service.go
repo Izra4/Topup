@@ -13,6 +13,8 @@ type PaymentService interface {
 	UpdatePayment(paymentID string, isPaid bool, transactionStatus string, link string) error
 	OrderConfirm(id string, transacStatus string) error
 	DeleteOrder(id string) (entity.Payment, error)
+	GetOrderByDoneStatus() ([]entity.Payment, error)
+	GetOrderByProcessStatus() ([]entity.Payment, error)
 }
 
 type paymentService struct {
@@ -65,4 +67,12 @@ func (ps *paymentService) OrderConfirm(id string, transacStatus string) error {
 
 func (ps *paymentService) DeleteOrder(id string) (entity.Payment, error) {
 	return ps.PaymentRepo.DeleteOrder(id)
+}
+
+func (ps *paymentService) GetOrderByProcessStatus() ([]entity.Payment, error) {
+	return ps.PaymentRepo.GetOrderByProcessStatus()
+}
+
+func (ps *paymentService) GetOrderByDoneStatus() ([]entity.Payment, error) {
+	return ps.PaymentRepo.GetOrderByDoneStatus()
 }

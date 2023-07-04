@@ -7,17 +7,16 @@ import (
 	"TopUpWEb/repository"
 	"TopUpWEb/service"
 	"github.com/gin-gonic/gin"
-	storage_go "github.com/supabase-community/storage-go"
 	"gorm.io/gorm"
 )
 
 func init() {
 	initializers.LoadEnv()
 	initializers.SyncDb()
-	//handler.GamesData()
-	//handler.MLTopUp()
-	//handler.PUBGTopUp()
-	//handler.ValorantTopUp()
+	handler.GamesData()
+	handler.MLTopUp()
+	handler.PUBGTopUp()
+	handler.ValorantTopUp()
 }
 
 func GameHandler(db *gorm.DB) *handler.GamesHandler {
@@ -47,10 +46,6 @@ func PaymentHandler(db *gorm.DB) *handler.PaymentHandler {
 	return paymentHandler
 }
 
-func initSupabase(client *storage_go.Client) {
-	return
-}
-
 func main() {
 	db := database.InitDB()
 	gameHandler := GameHandler(db)
@@ -64,12 +59,14 @@ func main() {
 	r.GET("/orders-list", paymentHandler.ShowPaidOrder)
 	r.GET("/orders-list/:id", paymentHandler.ShowOrderByIdAdmin)
 	r.GET("/order-status", paymentHandler.ShowOrderByIdUser)
+	r.GET("/done-orders", paymentHandler.ShowDoneOrder)
+	r.GET("/process-orders", paymentHandler.ShowProcessOrder)
 	r.POST("/booking/:id", bookingHandler.CreateBooking)
 	r.POST("/order", paymentHandler.CreateOrder)
 	r.PATCH("/order/pay/:id", paymentHandler.Payment)
 	r.PATCH("/order/confirm-order/:id", paymentHandler.ConfirmOrder)
 	r.DELETE("/admin-delete/:id", paymentHandler.DeleteOrderAdmin)
-	r.DELETE("user-delete", paymentHandler.DeleteOrderUser)
+	r.DELETE("/user-delete", paymentHandler.DeleteOrderUser)
 
 	r.Run()
 }

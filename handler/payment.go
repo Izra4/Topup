@@ -73,6 +73,7 @@ type orderList struct {
 	Name           string `json:"name"`
 	JenisPaket     string `json:"jenis_paket"`
 	PaymentMeethod string `json:"payment_meethod"`
+	Status         string `json:"status"`
 }
 
 func (ph *PaymentHandler) ShowPaidOrder(c *gin.Context) {
@@ -93,11 +94,34 @@ func (ph *PaymentHandler) ShowPaidOrder(c *gin.Context) {
 			Name:           order.Name,
 			JenisPaket:     order.JenisPaket,
 			PaymentMeethod: order.PaymentMethod,
+			Status:         order.TransactionStatus,
 		}
 		orders = append(orders, paid)
 	}
 
 	sdk.Success(c, 200, "Success to get data", orders)
+}
+
+func (ph *PaymentHandler) ShowDoneOrder(c *gin.Context) {
+	doneOrder, err := ph.PaymentService.GetOrderByDoneStatus()
+	if err != nil {
+		sdk.FailOrError(c, 500, "Failed to load", err)
+		return
+	}
+	if doneOrder == nil {
+		sdk.Success(c, 200, "No orders done", doneOrder)
+		return
+	}
+	sdk.Success(c, 200, "Data found", doneOrder)
+}
+
+func (ph *PaymentHandler) ShowProcessOrder(c *gin.Context) {
+	processOrder, err := ph.PaymentService.GetOrderByProcessStatus()
+	if err != nil {
+		sdk.FailOrError(c, 500, "Failed to load", err)
+		return
+	}
+	sdk.Success(c, 200, "Data found", processOrder)
 }
 
 func (ph *PaymentHandler) ShowOrderByIdAdmin(c *gin.Context) {
