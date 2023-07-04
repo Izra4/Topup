@@ -7,11 +7,12 @@ import (
 	"TopUpWEb/repository"
 	"TopUpWEb/service"
 	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
 	"gorm.io/gorm"
+	"log"
 )
 
 func init() {
-	initializers.LoadEnv()
 	initializers.SyncDb()
 	handler.GamesData()
 	handler.MLTopUp()
@@ -47,12 +48,24 @@ func PaymentHandler(db *gorm.DB) *handler.PaymentHandler {
 }
 
 func main() {
+	err := godotenv.Load()
+
+	if err != nil {
+		log.Fatalln("Failed to load env file")
+	}
 	db := database.InitDB()
 	gameHandler := GameHandler(db)
 	bookingHandler := BookingHandler(db)
 	paymentHandler := PaymentHandler(db)
 
 	r := gin.Default()
+
+	r.GET("/test", func(c *gin.Context) {
+		c.JSON(200, gin.H{
+			"message": "succes",
+		})
+	})
+
 	r.GET("/games", gameHandler.GetAllGames)
 	r.GET("/games/:id", gameHandler.GetGamebyID)
 	r.GET("/booking-details", bookingHandler.ShowLatestBooking)
