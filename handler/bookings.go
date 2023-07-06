@@ -5,7 +5,6 @@ import (
 	"TopUpWEb/entity"
 	"TopUpWEb/sdk"
 	"TopUpWEb/service"
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"strconv"
 )
@@ -59,17 +58,18 @@ func (bh *BookingHandler) CreateBooking(c *gin.Context) {
 		sdk.Fail(c, 400, "Please insert user Id")
 		return
 	}
-	nameAcc := c.PostForm("name_acc")
-	if nameAcc == "" {
-		sdk.Fail(c, 500, "Acc Name is Empty")
-		return
-	}
+
 	if gamesId == 1 {
 		serverId = c.PostForm("ServerId")
 		if serverId == "" {
 			sdk.Fail(c, 400, "Please insert server Id")
 			return
 		}
+	}
+	nameAcc := c.PostForm("name_acc")
+	if nameAcc == "" {
+		sdk.Fail(c, 500, "Acc Name is Empty")
+		return
 	}
 
 	//CREATE DATA
@@ -89,7 +89,6 @@ func (bh *BookingHandler) CreateBooking(c *gin.Context) {
 		sdk.FailOrError(c, 500, "Failed to Create Booking Data", err)
 		return
 	}
-	fmt.Println(nameAcc)
 	sdk.Success(c, 200, "Booking data created", createBooking)
 }
 
@@ -128,7 +127,7 @@ func (bh *BookingHandler) ShowLatestBooking(c *gin.Context) {
 		return
 	}
 	if data.GamesID == 1 {
-		result := mlResult{
+		results := mlResult{
 			GameName:         game.Nama,
 			UserId:           data.UserId,
 			ServerId:         data.ServerId,
@@ -136,16 +135,16 @@ func (bh *BookingHandler) ShowLatestBooking(c *gin.Context) {
 			Harga:            topUp.Harga,
 			MetodePembayaran: data.PaymentMethod,
 		}
-		sdk.Success(c, 200, "Data Found", result)
+		sdk.Success(c, 200, "Data Found", results)
 		return
 	}
-	result := Result{
+	results := Result{
 		GameName:         game.Nama,
 		UserId:           data.UserId,
 		Data:             topUp.JenisPaket,
 		Harga:            topUp.Harga,
 		MetodePembayaran: data.PaymentMethod,
 	}
-	sdk.Success(c, 200, "Data Found", result)
+	sdk.Success(c, 200, "Data Found", results)
 
 }

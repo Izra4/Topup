@@ -46,12 +46,17 @@ func (ph *PaymentHandler) CreateOrder(c *gin.Context) {
 		sdk.FailOrError(c, 500, "Failed to get topup data", err)
 		return
 	}
-
-	result := entity.PaymentReq{
+	idGame := game.ID
+	userID := latestBooking.UserId
+	fmt.Println(idGame)
+	if idGame == 1 {
+		userID = userID + "(" + latestBooking.ServerId + ")"
+	}
+	results := entity.PaymentReq{
 		ID:                generateOrderID(),
 		Name:              game.Nama,
 		JenisPaket:        topUp.JenisPaket,
-		UserId:            latestBooking.UserId,
+		UserId:            userID,
 		PaymentMethod:     latestBooking.PaymentMethod,
 		NomorVA:           latestBooking.VirtualAcc,
 		NameAcc:           latestBooking.NameAcc,
@@ -60,7 +65,7 @@ func (ph *PaymentHandler) CreateOrder(c *gin.Context) {
 		PaymentLink:       "",
 		BookingId:         latestBooking.ID,
 	}
-	createdOrder, err := ph.PaymentService.Create(result)
+	createdOrder, err := ph.PaymentService.Create(results)
 	if err != nil {
 		sdk.FailOrError(c, 500, "Failed to create order", err)
 		return

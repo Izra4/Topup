@@ -12,10 +12,10 @@ import (
 
 func init() {
 	initializers.SyncDb()
-	handler.GamesData()
-	handler.MLTopUp()
-	handler.PUBGTopUp()
-	handler.ValorantTopUp()
+	//handler.GamesData()
+	//handler.MLTopUp()
+	//handler.PUBGTopUp()
+	//handler.ValorantTopUp()
 }
 
 func GameHandler(db *gorm.DB) *handler.GamesHandler {
@@ -57,7 +57,7 @@ func main() {
 	paymentHandler := PaymentHandler(db)
 
 	r := gin.Default()
-
+	initializers.Cors(r)
 	r.GET("/test", func(c *gin.Context) {
 		c.JSON(200, gin.H{
 			"message": "succes",
