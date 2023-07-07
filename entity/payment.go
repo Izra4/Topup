@@ -47,3 +47,16 @@ type PaymentReq struct {
 	PaymentLink       string `json:"payment_link"`
 	BookingId         uint   `json:"booking_id"`
 }
+
+type ShowOrder struct {
+	ID                string `json:"id"`
+	Name              string `json:"name"`
+	Jenis_paket       string `json:"jenis_paket"`
+	UserId            string `json:"user_id"`
+	PaymentMethod     string `json:"payment_method"`
+	NomorVA           string `json:"nomor_va"`
+	NameAcc           string `json:"name_acc"`
+	PaymentStatus     bool   `json:"payment_status"`
+	TransactionStatus string `json:"transaction_status"`
+	Harga             string `json:"harga"`
+}

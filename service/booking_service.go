@@ -9,6 +9,7 @@ import (
 type BookingService interface {
 	Create(book entity.BookingReq) (entity.Booking, error)
 	ShowLatest() (entity.Booking, error)
+	FindById(id uint) (entity.Booking, error)
 }
 
 type bookingService struct {
@@ -41,4 +42,8 @@ func (bs *bookingService) Create(book entity.BookingReq) (entity.Booking, error)
 
 func (bs *bookingService) ShowLatest() (entity.Booking, error) {
 	return bs.bookRepo.ShowLatest()
+}
+
+func (bs *bookingService) FindById(id uint) (entity.Booking, error) {
+	return bs.bookRepo.FindById(id)
 }

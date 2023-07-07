@@ -306,7 +306,29 @@ func (ph *PaymentHandler) ShowLatestOrder(c *gin.Context) {
 		sdk.FailOrError(c, 500, "Failed to get data", err)
 		return
 	}
-	sdk.Success(c, 200, "Success", data)
+	booking, err := ph.BookingService.FindById(data.BookingId)
+	if err != nil {
+		sdk.FailOrError(c, 500, "Failed to get data", err)
+		return
+	}
+	var topUp entity.ListTopUp
+	if err = database.DB.Where("id = ?", booking.ListTopUpId).Find(&topUp).Error; err != nil {
+		sdk.FailOrError(c, 500, "Failed to get top up data", err)
+		return
+	}
+	res := entity.ShowOrder{
+		ID:                data.ID,
+		Name:              data.Name,
+		Jenis_paket:       data.JenisPaket,
+		UserId:            data.UserId,
+		PaymentMethod:     data.PaymentMethod,
+		NomorVA:           data.NomorVA,
+		NameAcc:           data.NameAcc,
+		PaymentStatus:     false,
+		TransactionStatus: data.TransactionStatus,
+		Harga:             topUp.Harga,
+	}
+	sdk.Success(c, 200, "Success", res)
 }
 
 func generateOrderID() string {

@@ -8,6 +8,7 @@ import (
 type BookingRepository interface {
 	Create(book entity.Booking) (entity.Booking, error)
 	ShowLatest() (entity.Booking, error)
+	FindById(id uint) (entity.Booking, error)
 }
 
 type bookingRepository struct {
@@ -28,6 +29,14 @@ func (br *bookingRepository) Create(book entity.Booking) (entity.Booking, error)
 func (br *bookingRepository) ShowLatest() (entity.Booking, error) {
 	var booking entity.Booking
 	if err := br.db.Last(&booking).Error; err != nil {
+		return entity.Booking{}, err
+	}
+	return booking, nil
+}
+
+func (br *bookingRepository) FindById(id uint) (entity.Booking, error) {
+	var booking entity.Booking
+	if err := br.db.First(&booking, id).Error; err != nil {
 		return entity.Booking{}, err
 	}
 	return booking, nil
