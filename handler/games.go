@@ -54,6 +54,7 @@ type listTopUpRes struct {
 	ID    uint   `json:"id"`
 	Price string `json:"price"`
 	Type  string `json:"type"`
+	Link  string `json:"link"`
 }
 
 func (h *GamesHandler) GetGamebyID(c *gin.Context) {
@@ -84,6 +85,7 @@ func (h *GamesHandler) GetGamebyID(c *gin.Context) {
 			ID:    topup.ID,
 			Price: topup.Harga,
 			Type:  topup.JenisPaket,
+			Link:  topup.Link,
 		})
 	}
 	results.TopUps = topupResults

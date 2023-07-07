@@ -13,9 +13,9 @@ import (
 func init() {
 	initializers.SyncDb()
 	//handler.GamesData()
-	//handler.MLTopUp()
-	//handler.PUBGTopUp()
-	//handler.ValorantTopUp()
+	handler.MLTopUp()
+	handler.PUBGTopUp()
+	handler.ValorantTopUp()
 }
 
 func GameHandler(db *gorm.DB) *handler.GamesHandler {
