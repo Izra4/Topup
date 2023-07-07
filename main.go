@@ -13,9 +13,9 @@ import (
 func init() {
 	initializers.SyncDb()
 	//handler.GamesData()
-	handler.MLTopUp()
-	handler.PUBGTopUp()
-	handler.ValorantTopUp()
+	//handler.MLTopUp()
+	//handler.PUBGTopUp()
+	//handler.ValorantTopUp()
 }
 
 func GameHandler(db *gorm.DB) *handler.GamesHandler {
@@ -84,6 +84,7 @@ func main() {
 	r.GET("/order-status", paymentHandler.ShowOrderByIdUser)
 	r.GET("/done-orders", paymentHandler.ShowDoneOrder)
 	r.GET("/process-orders", paymentHandler.ShowProcessOrder)
+	r.GET("/latest-order", paymentHandler.ShowLatestOrder)
 	r.POST("/booking/:id", bookingHandler.CreateBooking)
 	r.POST("/order", paymentHandler.CreateOrder)
 	r.PATCH("/order/pay/:id", paymentHandler.Payment)

@@ -15,6 +15,7 @@ type PaymentService interface {
 	DeleteOrder(id string) (entity.Payment, error)
 	GetOrderByDoneStatus() ([]entity.Payment, error)
 	GetOrderByProcessStatus() ([]entity.Payment, error)
+	ShowLatestOrder() (entity.Payment, error)
 }
 
 type paymentService struct {
@@ -75,4 +76,8 @@ func (ps *paymentService) GetOrderByProcessStatus() ([]entity.Payment, error) {
 
 func (ps *paymentService) GetOrderByDoneStatus() ([]entity.Payment, error) {
 	return ps.PaymentRepo.GetOrderByDoneStatus()
+}
+
+func (ps *paymentService) ShowLatestOrder() (entity.Payment, error) {
+	return ps.PaymentRepo.ShowLatestOrder()
 }

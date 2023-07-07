@@ -14,6 +14,7 @@ type PaymentRepository interface {
 	UpdatePayment(id string, paymentStatus bool, transacStatus string, paymentLink string) error
 	OrderConfirm(id string, transacStatus string) error
 	DeleteOrder(id string) (entity.Payment, error)
+	ShowLatestOrder() (entity.Payment, error)
 }
 
 type paymentRepository struct {
@@ -94,4 +95,12 @@ func (pr *paymentRepository) GetOrderByProcessStatus() ([]entity.Payment, error)
 		return nil, err
 	}
 	return result, nil
+}
+
+func (pr *paymentRepository) ShowLatestOrder() (entity.Payment, error) {
+	var data entity.Payment
+	if err := pr.db.Order("created_at desc").First(&data).Error; err != nil {
+		return entity.Payment{}, err
+	}
+	return data, nil
 }

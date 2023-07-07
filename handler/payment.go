@@ -300,6 +300,15 @@ type orderResult struct {
 	Status string `json:"status"`
 }
 
+func (ph *PaymentHandler) ShowLatestOrder(c *gin.Context) {
+	data, err := ph.PaymentService.ShowLatestOrder()
+	if err != nil {
+		sdk.FailOrError(c, 500, "Failed to get data", err)
+		return
+	}
+	sdk.Success(c, 200, "Success", data)
+}
+
 func generateOrderID() string {
 	// Generate random number with 8 characters
 	randSource := rand.NewSource(time.Now().UnixNano())
