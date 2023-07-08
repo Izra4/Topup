@@ -331,6 +331,30 @@ func (ph *PaymentHandler) ShowLatestOrder(c *gin.Context) {
 	sdk.Success(c, 200, "Success", res)
 }
 
+func (ph *PaymentHandler) FindOrderByGame(c *gin.Context) {
+	gameName := c.PostForm("name")
+	if gameName == "" {
+		sdk.Fail(c, 500, "failed to get game name")
+		return
+	}
+
+	if gameName == "1" {
+		gameName = "Mobile Legends"
+	} else if gameName == "2" {
+		gameName = "PUBG Mobile"
+	} else if gameName == "3" {
+		gameName = "Valorant"
+	}
+
+	payments, err := ph.PaymentService.FindOrderByGame(gameName)
+	if err != nil {
+		sdk.FailOrError(c, http.StatusInternalServerError, "Failed to find orders by game", err)
+		return
+	}
+
+	sdk.Success(c, http.StatusOK, "Orders found by game", payments)
+}
+
 func generateOrderID() string {
 	// Generate random number with 8 characters
 	randSource := rand.NewSource(time.Now().UnixNano())

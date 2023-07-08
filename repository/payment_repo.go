@@ -15,6 +15,7 @@ type PaymentRepository interface {
 	OrderConfirm(id string, transacStatus string) error
 	DeleteOrder(id string) (entity.Payment, error)
 	ShowLatestOrder() (entity.Payment, error)
+	FindOrderByGame(name string) ([]entity.Payment, error)
 }
 
 type paymentRepository struct {
@@ -103,4 +104,12 @@ func (pr *paymentRepository) ShowLatestOrder() (entity.Payment, error) {
 		return entity.Payment{}, err
 	}
 	return data, nil
+}
+
+func (pr *paymentRepository) FindOrderByGame(name string) ([]entity.Payment, error) {
+	var payments []entity.Payment
+	if err := pr.db.Where("name = ? AND is_paid = ?", name, true).Find(&payments).Error; err != nil {
+		return nil, err
+	}
+	return payments, nil
 }

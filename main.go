@@ -85,6 +85,7 @@ func main() {
 	r.GET("/done-orders", paymentHandler.ShowDoneOrder)
 	r.GET("/process-orders", paymentHandler.ShowProcessOrder)
 	r.GET("/latest-order", paymentHandler.ShowLatestOrder)
+	r.GET("/orders-by-name", paymentHandler.FindOrderByGame)
 	r.POST("/booking/:id", bookingHandler.CreateBooking)
 	r.POST("/order", paymentHandler.CreateOrder)
 	r.PATCH("/order/pay/:id", paymentHandler.Payment)
