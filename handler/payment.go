@@ -156,11 +156,12 @@ func (ph *PaymentHandler) ShowOrderByIdAdmin(c *gin.Context) {
 }
 
 func (ph *PaymentHandler) ShowOrderByIdUser(c *gin.Context) {
-	id := c.PostForm("id")
+	id := c.Query("id")
 	if id == "" {
 		sdk.Fail(c, 400, "Input the id")
 		return
 	}
+	id = "#" + id
 
 	results, err := ph.PaymentService.GetById(id)
 	if err != nil {
