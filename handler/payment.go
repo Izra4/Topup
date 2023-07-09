@@ -352,6 +352,46 @@ func (ph *PaymentHandler) FindOrderByGame(c *gin.Context) {
 	sdk.Success(c, http.StatusOK, "Orders found by game", payments)
 }
 
+type OrderHistoryResponse struct {
+	GameName   string    `json:"game_name"`
+	JenisPaket string    `json:"jenis_paket"`
+	UserID     string    `json:"user_id"`
+	Harga      string    `json:"harga"`
+	Tanggal    time.Time `json:"tanggal"`
+	Status     string    `json:"status"`
+}
+
+func (ph *PaymentHandler) ShowHistory(c *gin.Context) {
+	datas, err := ph.PaymentService.OrderHistory()
+	if err != nil {
+		sdk.FailOrError(c, 500, "Failed to get data", err)
+		return
+	}
+	var response []OrderHistoryResponse
+	for _, data := range datas {
+		booking, errs := ph.BookingService.FindById(data.BookingId)
+		if errs != nil {
+			sdk.FailOrError(c, http.StatusInternalServerError, "Failed to get booking information", errs)
+			return
+		}
+		var topUp entity.ListTopUp
+		if err = database.DB.Where("id = ?", booking.ListTopUpId).Find(&topUp).Error; err != nil {
+			sdk.FailOrError(c, 500, "Failed to get top up data", err)
+			return
+		}
+		temp := OrderHistoryResponse{
+			GameName:   data.Name,
+			JenisPaket: data.JenisPaket,
+			UserID:     data.UserId,
+			Harga:      topUp.Harga,
+			Tanggal:    data.UpdatedAt,
+			Status:     data.TransactionStatus,
+		}
+		response = append(response, temp)
+	}
+	sdk.Success(c, 200, "Data found", response)
+}
+
 func generateOrderID() string {
 	// Generate random number with 8 characters
 	randSource := rand.NewSource(time.Now().UnixNano())
