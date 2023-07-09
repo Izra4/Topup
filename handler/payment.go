@@ -155,19 +155,16 @@ func (ph *PaymentHandler) ShowOrderByIdAdmin(c *gin.Context) {
 	sdk.Success(c, 200, "Data loaded", results)
 }
 
-type idReq struct {
-	Id string `json:"id" binding:"required"`
-}
-
 func (ph *PaymentHandler) ShowOrderByIdUser(c *gin.Context) {
-	var req idReq
-	if err := c.ShouldBindJSON(&req); err != nil {
-		sdk.FailOrError(c, 400, "Please input the id that you want to check", err)
+	id := c.PostForm("id")
+	if id == "" {
+		sdk.Fail(c, 400, "Input the id")
+		return
 	}
 
-	results, err := ph.PaymentService.GetById(req.Id)
+	results, err := ph.PaymentService.GetById(id)
 	if err != nil {
-		sdk.FailOrError(c, 400, "Order with id: "+req.Id+"isn't exist", err)
+		sdk.FailOrError(c, 400, "Order with id: "+id+"isn't exist", err)
 		return
 	}
 	linkStr := ""
@@ -282,17 +279,17 @@ func (ph *PaymentHandler) DeleteOrderAdmin(c *gin.Context) {
 	sdk.Success(c, 200, "Order with id "+id+" deleted", data)
 }
 func (ph *PaymentHandler) DeleteOrderUser(c *gin.Context) {
-	var req idReq
-	if err := c.ShouldBindJSON(&req); err != nil {
-		sdk.FailOrError(c, 400, "Please input the id that you want to delete", err)
+	id := c.PostForm("id")
+	if id == "" {
+		sdk.Fail(c, 400, "Input the id")
 		return
 	}
-	data, err := ph.PaymentService.DeleteOrder(req.Id)
+	data, err := ph.PaymentService.DeleteOrder(id)
 	if err != nil {
 		sdk.FailOrError(c, 500, "Failed to delete", err)
 		return
 	}
-	sdk.Success(c, 200, "Order with id: "+req.Id+" deleted", data)
+	sdk.Success(c, 200, "Order with id: "+id+" deleted", data)
 }
 
 type orderResult struct {
