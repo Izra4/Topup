@@ -101,6 +101,7 @@ func main() {
 	r.PATCH("/order/pay/:id", paymentHandler.Payment)
 	r.PATCH("/order/confirm-order/:id", paymentHandler.ConfirmOrder)
 	r.PATCH("/change-pass", adminHandler.ChangePass)
+	r.PATCH("/change-uname", adminHandler.ChangeUname)
 	r.DELETE("/admin-delete/:id", paymentHandler.DeleteOrderAdmin)
 	r.DELETE("/user-delete", paymentHandler.DeleteOrderUser)
 

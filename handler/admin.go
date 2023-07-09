@@ -95,6 +95,27 @@ func (ah *AdminHandler) ChangePass(c *gin.Context) {
 	sdk.Success(c, 200, "Password changed", nil)
 }
 
+func (ah *AdminHandler) ChangeUname(c *gin.Context) {
+	newUname := c.PostForm("uname")
+	if newUname == "" {
+		sdk.Fail(c, 400, "Nothing changed")
+		return
+	}
+	var data entity.Admin
+	if err := database.DB.First(&data, 1).Error; err != nil {
+		sdk.FailOrError(c, 500, "Failed to get data", err)
+		return
+	}
+	if err := ah.adminService.UpdateAdminName(1, newUname); err != nil {
+		sdk.FailOrError(c, 500, "Failed to update new name", err)
+		return
+	}
+	sdk.Success(c, 200, "Success to change name", gin.H{
+		"new_uname": newUname,
+	})
+
+}
+
 func Hashing(pass string) (string, error) {
 	hashedPass, err := bcrypt.GenerateFromPassword([]byte(pass), bcrypt.DefaultCost)
 	if err != nil {
