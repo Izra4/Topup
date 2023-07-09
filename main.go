@@ -62,7 +62,7 @@ func main() {
 	gameHandler := GameHandler(db)
 	bookingHandler := BookingHandler(db)
 	paymentHandler := PaymentHandler(db)
-	handler.CreateAdmin(db)
+	//handler.CreateAdmin(db)
 	adminHandler := AdminHandler(db)
 
 	r := gin.Default()
@@ -100,6 +100,7 @@ func main() {
 	r.POST("/Login", adminHandler.Login)
 	r.PATCH("/order/pay/:id", paymentHandler.Payment)
 	r.PATCH("/order/confirm-order/:id", paymentHandler.ConfirmOrder)
+	r.PATCH("/change-pass", adminHandler.ChangePass)
 	r.DELETE("/admin-delete/:id", paymentHandler.DeleteOrderAdmin)
 	r.DELETE("/user-delete", paymentHandler.DeleteOrderUser)
 

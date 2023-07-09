@@ -63,6 +63,38 @@ func (ah *AdminHandler) Login(c *gin.Context) {
 	sdk.Success(c, 200, "Login Success", nil)
 }
 
+func (ah *AdminHandler) ChangePass(c *gin.Context) {
+	oldPass := c.PostForm("oldPass")
+	if oldPass == "" {
+		sdk.Fail(c, 400, "Old pass value is empty")
+		return
+	}
+	newPass := c.PostForm("newPass")
+	if newPass == "" {
+		sdk.Fail(c, 400, "New pass value is empty")
+		return
+	}
+	var data entity.Admin
+	if err := database.DB.First(&data, 1).Error; err != nil {
+		sdk.FailOrError(c, 500, "Failed to get data", err)
+		return
+	}
+	if err := ValidateHash(data.Password, oldPass); err != nil {
+		sdk.FailOrError(c, 400, "Invalid pass", err)
+		return
+	}
+	hashedPass, err := Hashing(newPass)
+	if err != nil {
+		sdk.FailOrError(c, 500, "Failed to hash", err)
+		return
+	}
+	if err = ah.adminService.UpdateAdminPassword(1, hashedPass); err != nil {
+		sdk.FailOrError(c, 500, "Failed to update", err)
+		return
+	}
+	sdk.Success(c, 200, "Password changed", nil)
+}
+
 func Hashing(pass string) (string, error) {
 	hashedPass, err := bcrypt.GenerateFromPassword([]byte(pass), bcrypt.DefaultCost)
 	if err != nil {
