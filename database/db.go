@@ -32,5 +32,6 @@ func Migrate(db *gorm.DB) error {
 		&entity.ListTopUp{},
 		&entity.Booking{},
 		&entity.Payment{},
+		&entity.Admin{},
 	)
 }

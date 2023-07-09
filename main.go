@@ -45,6 +45,13 @@ func PaymentHandler(db *gorm.DB) *handler.PaymentHandler {
 	return paymentHandler
 }
 
+func AdminHandler(db *gorm.DB) *handler.AdminHandler {
+	adminRepo := repository.NewAdminRepo(db)
+	adminServ := service.NewAdminService(adminRepo)
+	adminHandler := handler.NewAdminHandler(adminServ)
+	return adminHandler
+}
+
 func main() {
 	//err := godotenv.Load()
 	//
@@ -55,6 +62,8 @@ func main() {
 	gameHandler := GameHandler(db)
 	bookingHandler := BookingHandler(db)
 	paymentHandler := PaymentHandler(db)
+	handler.CreateAdmin(db)
+	adminHandler := AdminHandler(db)
 
 	r := gin.Default()
 	r.Use(func(c *gin.Context) {
@@ -88,6 +97,7 @@ func main() {
 	r.GET("/orders-by-name", paymentHandler.FindOrderByGame)
 	r.POST("/booking/:id", bookingHandler.CreateBooking)
 	r.POST("/order", paymentHandler.CreateOrder)
+	r.POST("/Login", adminHandler.Login)
 	r.PATCH("/order/pay/:id", paymentHandler.Payment)
 	r.PATCH("/order/confirm-order/:id", paymentHandler.ConfirmOrder)
 	r.DELETE("/admin-delete/:id", paymentHandler.DeleteOrderAdmin)
