@@ -329,12 +329,12 @@ func (ph *PaymentHandler) ShowLatestOrder(c *gin.Context) {
 }
 
 func (ph *PaymentHandler) FindOrderByGame(c *gin.Context) {
-	gameName := c.PostForm("name")
+	gameName := c.Query("name")
 	if gameName == "" {
 		sdk.Fail(c, 500, "failed to get game name")
 		return
 	}
-
+	fmt.Println(gameName)
 	if gameName == "1" {
 		gameName = "Mobile Legends"
 	} else if gameName == "2" {
