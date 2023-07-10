@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	storage_go "github.com/supabase-community/storage-go"
+	"gopkg.in/gomail.v2"
 	"math/rand"
 	"net/http"
 	"os"
@@ -215,17 +216,27 @@ func (ph *PaymentHandler) ShowOrderByIdUser(c *gin.Context) {
 func (ph *PaymentHandler) Payment(c *gin.Context) {
 	id := c.Param("id")
 	id = "#" + id
-
+	data, err := ph.PaymentService.GetById(id)
+	if err != nil {
+		sdk.FailOrError(c, 500, "Data not found", err)
+		return
+	}
+	booking, err := ph.BookingService.FindById(data.BookingId)
+	if err != nil {
+		sdk.FailOrError(c, 500, "Failed to get data", err)
+		return
+	}
+	var topUp entity.ListTopUp
+	if err = database.DB.Where("id = ?", booking.ListTopUpId).Find(&topUp).Error; err != nil {
+		sdk.FailOrError(c, 500, "Failed to get top up data", err)
+		return
+	}
 	isPaid, ok := strconv.ParseBool(c.PostForm("is_paid"))
 	if ok != nil {
 		sdk.FailOrError(c, 500, "Failed to convert boolean", ok)
 		return
 	}
-	_, err := ph.PaymentService.GetById(id)
-	if err != nil {
-		sdk.FailOrError(c, 500, "Data not found", err)
-		return
-	}
+
 	transacStatus := c.PostForm("status")
 	if transacStatus == "" {
 		sdk.Fail(c, 400, "Failed to get new transaction status")
@@ -255,6 +266,7 @@ func (ph *PaymentHandler) Payment(c *gin.Context) {
 		TransStatus: transacStatus,
 		Link:        fileName,
 	}
+	sendEmail(id, data.Name, data.JenisPaket, topUp.Harga)
 	err = ph.PaymentService.UpdatePayment(id, isPaid, transacStatus, fileName)
 	if err != nil {
 		sdk.FailOrError(c, 500, "payment failed", err)
@@ -439,4 +451,27 @@ func randString() string {
 	}
 
 	return string(b)
+}
+
+func sendEmail(id string, gameName string, jenisPaket string, harga string) {
+	subject := "New Payment Notification"
+	body := fmt.Sprintf("New payment notification\n\n"+
+		"Order ID: %s\n"+
+		"Game: %s\n"+
+		"Jenis Paket: %s\n"+
+		"Harga: %s\n"+
+		"User has successfully uploaded payment proof.",
+		id, gameName, jenisPaket, harga)
+
+	m := gomail.NewMessage()
+	m.SetHeader("From", "grahagrent@gmail.com")
+	m.SetHeader("To", "aryaizra2@gmail.com")
+	m.SetHeader("Subject", subject)
+	m.SetBody("text/plain", body)
+
+	d := gomail.NewDialer("smtp.gmail.com", 587, os.Getenv("EMAIL"), os.Getenv("EMAIL_PASS"))
+
+	if err := d.DialAndSend(m); err != nil {
+		panic(err)
+	}
 }
