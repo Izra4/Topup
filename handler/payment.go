@@ -139,11 +139,22 @@ func (ph *PaymentHandler) ShowOrderByIdAdmin(c *gin.Context) {
 	}
 	client := getClient()
 	link := client.GetPublicUrl("Link_Bayar", order.PaymentLink)
+	booking, errs := ph.BookingService.FindById(order.BookingId)
+	if errs != nil {
+		sdk.FailOrError(c, http.StatusInternalServerError, "Failed to get booking information", errs)
+		return
+	}
+	var topUp entity.ListTopUp
+	if err = database.DB.Where("id = ?", booking.ListTopUpId).Find(&topUp).Error; err != nil {
+		sdk.FailOrError(c, 500, "Failed to get top up data", err)
+		return
+	}
 	results := entity.PaymentRes{
 		ID:                order.ID,
 		Created_time:      order.CreatedAt,
 		Name:              order.Name,
 		Jenis_paket:       order.JenisPaket,
+		Harga:             topUp.Harga,
 		UserId:            order.UserId,
 		PaymentMethod:     order.PaymentMethod,
 		NomorVA:           order.NomorVA,
@@ -174,12 +185,22 @@ func (ph *PaymentHandler) ShowOrderByIdUser(c *gin.Context) {
 		link := client.GetPublicUrl("Link_Bayar", results.PaymentLink)
 		linkStr = link.SignedURL
 	}
-
+	booking, errs := ph.BookingService.FindById(results.BookingId)
+	if errs != nil {
+		sdk.FailOrError(c, http.StatusInternalServerError, "Failed to get booking information", errs)
+		return
+	}
+	var topUp entity.ListTopUp
+	if err = database.DB.Where("id = ?", booking.ListTopUpId).Find(&topUp).Error; err != nil {
+		sdk.FailOrError(c, 500, "Failed to get top up data", err)
+		return
+	}
 	res := entity.PaymentRes{
 		ID:                results.ID,
 		Created_time:      results.CreatedAt,
 		Name:              results.Name,
 		Jenis_paket:       results.JenisPaket,
+		Harga:             topUp.Harga,
 		UserId:            results.UserId,
 		PaymentMethod:     results.PaymentMethod,
 		NomorVA:           results.NomorVA,

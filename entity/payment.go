@@ -25,6 +25,7 @@ type PaymentRes struct {
 	Created_time      time.Time `json:"created_time"`
 	Name              string    `json:"name"`
 	Jenis_paket       string    `json:"jenis_paket"`
+	Harga             string    `json:"harga"`
 	UserId            string    `json:"user_id"`
 	PaymentMethod     string    `json:"payment_method"`
 	NomorVA           string    `json:"nomor_va"`
