@@ -4,6 +4,7 @@ import (
 	"TopUpWEb/database"
 	"TopUpWEb/handler"
 	"TopUpWEb/initializers"
+	"TopUpWEb/middleware"
 	"TopUpWEb/repository"
 	"TopUpWEb/service"
 	"github.com/gin-gonic/gin"
@@ -100,10 +101,10 @@ func main() {
 	r.POST("/order", paymentHandler.CreateOrder)
 	r.POST("/Login", adminHandler.Login)
 	r.PATCH("/order/pay/:id", paymentHandler.Payment)
-	r.PATCH("/order/confirm-order/:id", paymentHandler.ConfirmOrder)
-	r.PATCH("/change-pass", adminHandler.ChangePass)
-	r.PATCH("/change-uname", adminHandler.ChangeUname)
-	r.DELETE("/admin-delete/:id", paymentHandler.DeleteOrderAdmin)
+	r.PATCH("/order/confirm-order/:id", middleware.Authorization(), paymentHandler.ConfirmOrder)
+	r.PATCH("/change-pass", middleware.Authorization(), adminHandler.ChangePass)
+	r.PATCH("/change-uname", middleware.Authorization(), adminHandler.ChangeUname)
+	r.DELETE("/admin-delete/:id", middleware.Authorization(), paymentHandler.DeleteOrderAdmin)
 	r.DELETE("/user-delete", paymentHandler.DeleteOrderUser)
 
 	r.Run()

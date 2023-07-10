@@ -60,10 +60,18 @@ func (ah *AdminHandler) Login(c *gin.Context) {
 		sdk.Fail(c, http.StatusNotFound, "Invalid pass")
 		return
 	}
-	sdk.Success(c, 200, "Login Success", nil)
+	tokenStr, err := sdk.Token(admin)
+	if err != nil {
+		sdk.FailOrError(c, http.StatusInternalServerError, "create token failed", err)
+		return
+	}
+	sdk.Success(c, 200, "Login Success", map[string]string{"token": tokenStr})
 }
 
 func (ah *AdminHandler) ChangePass(c *gin.Context) {
+	id, _ := c.Get("admin")
+	claims := id.(entity.AdminClaims)
+
 	oldPass := c.PostForm("oldPass")
 	if oldPass == "" {
 		sdk.Fail(c, 400, "Old pass value is empty")
@@ -75,7 +83,7 @@ func (ah *AdminHandler) ChangePass(c *gin.Context) {
 		return
 	}
 	var data entity.Admin
-	if err := database.DB.First(&data, 1).Error; err != nil {
+	if err := database.DB.First(&data, claims.ID).Error; err != nil {
 		sdk.FailOrError(c, 500, "Failed to get data", err)
 		return
 	}
@@ -88,7 +96,7 @@ func (ah *AdminHandler) ChangePass(c *gin.Context) {
 		sdk.FailOrError(c, 500, "Failed to hash", err)
 		return
 	}
-	if err = ah.adminService.UpdateAdminPassword(1, hashedPass); err != nil {
+	if err = ah.adminService.UpdateAdminPassword(claims.ID, hashedPass); err != nil {
 		sdk.FailOrError(c, 500, "Failed to update", err)
 		return
 	}
@@ -96,17 +104,20 @@ func (ah *AdminHandler) ChangePass(c *gin.Context) {
 }
 
 func (ah *AdminHandler) ChangeUname(c *gin.Context) {
+	id, _ := c.Get("admin")
+	claims := id.(entity.AdminClaims)
+
 	newUname := c.PostForm("uname")
 	if newUname == "" {
 		sdk.Fail(c, 400, "Nothing changed")
 		return
 	}
 	var data entity.Admin
-	if err := database.DB.First(&data, 1).Error; err != nil {
+	if err := database.DB.First(&data, claims.ID).Error; err != nil {
 		sdk.FailOrError(c, 500, "Failed to get data", err)
 		return
 	}
-	if err := ah.adminService.UpdateAdminName(1, newUname); err != nil {
+	if err := ah.adminService.UpdateAdminName(claims.ID, newUname); err != nil {
 		sdk.FailOrError(c, 500, "Failed to update new name", err)
 		return
 	}
