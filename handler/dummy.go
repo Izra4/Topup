@@ -47,6 +47,20 @@ func GamesData() {
 }
 
 func MLTopUp() {
+	t00 := entity.ListTopUp{
+		Model:      gorm.Model{},
+		GamesID:    1,
+		JenisPaket: "Weekly Diamond Pass",
+		Harga:      "25.200",
+		Link:       "https://veolwtbyepcnwgvrwnwu.supabase.co/storage/v1/object/public/Gambar_Game/weekly.webp",
+	}
+	t01 := entity.ListTopUp{
+		Model:      gorm.Model{},
+		GamesID:    1,
+		JenisPaket: "Twilight Pass",
+		Harga:      "130.500",
+		Link:       "https://veolwtbyepcnwgvrwnwu.supabase.co/storage/v1/object/public/Gambar_Game/twilight.webp",
+	}
 	t1 := entity.ListTopUp{
 		Model:      gorm.Model{},
 		GamesID:    1,
@@ -103,7 +117,12 @@ func MLTopUp() {
 		Harga:      "Rp. 1.928.000",
 		Link:       "https://veolwtbyepcnwgvrwnwu.supabase.co/storage/v1/object/public/Gambar_Game/sekoper.webp",
 	}
-
+	if err := database.DB.Create(&t00).Error; err != nil {
+		fmt.Println(err.Error())
+	}
+	if err := database.DB.Create(&t01).Error; err != nil {
+		fmt.Println(err.Error())
+	}
 	if err := database.DB.Create(&t1).Error; err != nil {
 		fmt.Println(err.Error())
 	}

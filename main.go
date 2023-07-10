@@ -14,7 +14,7 @@ import (
 func init() {
 	initializers.SyncDb()
 	//handler.GamesData()
-	//handler.MLTopUp()
+	handler.MLTopUp()
 	//handler.PUBGTopUp()
 	//handler.ValorantTopUp()
 }
