@@ -130,6 +130,34 @@ func (ph *PaymentHandler) ShowProcessOrder(c *gin.Context) {
 	sdk.Success(c, 200, "Data found", processOrder)
 }
 
+type Failed struct {
+	Id     string `json:"id"`
+	Nama   string `json:"nama"`
+	Jenis  string `json:"jenis"`
+	Metode string `json:"metode"`
+	Status string `json:"status"`
+}
+
+func (ph *PaymentHandler) ShowFailedOrder(c *gin.Context) {
+	fail, err := ph.PaymentService.GetOrderByFailStatus()
+	if err != nil {
+		sdk.FailOrError(c, 500, "Failed to load", err)
+		return
+	}
+	var datas []Failed
+	for _, fails := range fail {
+		temp := Failed{
+			Id:     fails.ID,
+			Nama:   fails.Name,
+			Jenis:  fails.JenisPaket,
+			Metode: fails.PaymentMethod,
+			Status: fails.TransactionStatus,
+		}
+		datas = append(datas, temp)
+	}
+	sdk.Success(c, 200, "Data found", datas)
+}
+
 func (ph *PaymentHandler) ShowOrderByIdAdmin(c *gin.Context) {
 	idOrder := c.Param("id")
 	fmt.Println(idOrder)

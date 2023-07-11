@@ -15,7 +15,7 @@ type Payment struct {
 	NomorVA           string    `gorm:"type:VARCHAR(20);NOT NULL" json:"nomor_va"`
 	NameAcc           string    `gorm:"type:VARCHAR(30);NOT NULL" json:"name_acc"`
 	PaymentStatus     bool      `gorm:"column:is_paid;default:false" json:"payment_status"`
-	TransactionStatus string    `gorm:"type:VARCHAR(15);NOT NULL" json:"transaction_status"`
+	TransactionStatus string    `gorm:"type:VARCHAR(50);NOT NULL" json:"transaction_status"`
 	PaymentLink       string    `gorm:"type:TEXT;NOT NULL" json:"payment_link"`
 	BookingId         uint      `gorm:"unique" json:"booking_id"`
 }

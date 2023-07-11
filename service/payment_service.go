@@ -18,6 +18,7 @@ type PaymentService interface {
 	ShowLatestOrder() (entity.Payment, error)
 	FindOrderByGame(name string) ([]entity.Payment, error)
 	OrderHistory() ([]entity.Payment, error)
+	GetOrderByFailStatus() ([]entity.Payment, error)
 }
 
 type paymentService struct {
@@ -90,4 +91,8 @@ func (ps *paymentService) FindOrderByGame(name string) ([]entity.Payment, error)
 
 func (ps *paymentService) OrderHistory() ([]entity.Payment, error) {
 	return ps.PaymentRepo.OrderHistory()
+}
+
+func (ps *paymentService) GetOrderByFailStatus() ([]entity.Payment, error) {
+	return ps.PaymentRepo.GetOrderByFailStatus()
 }

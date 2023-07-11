@@ -17,6 +17,7 @@ type PaymentRepository interface {
 	ShowLatestOrder() (entity.Payment, error)
 	FindOrderByGame(name string) ([]entity.Payment, error)
 	OrderHistory() ([]entity.Payment, error)
+	GetOrderByFailStatus() ([]entity.Payment, error)
 }
 
 type paymentRepository struct {
@@ -94,6 +95,14 @@ func (pr *paymentRepository) GetOrderByDoneStatus() ([]entity.Payment, error) {
 func (pr *paymentRepository) GetOrderByProcessStatus() ([]entity.Payment, error) {
 	var result []entity.Payment
 	if err := pr.db.Where("transaction_status = ?", "Sedang Proses").Find(&result).Error; err != nil {
+		return nil, err
+	}
+	return result, nil
+}
+
+func (pr *paymentRepository) GetOrderByFailStatus() ([]entity.Payment, error) {
+	var result []entity.Payment
+	if err := pr.db.Where("transaction_status = ?", "Pembayaran invalid").Find(&result).Error; err != nil {
 		return nil, err
 	}
 	return result, nil

@@ -97,6 +97,7 @@ func main() {
 	r.GET("/latest-order", paymentHandler.ShowLatestOrder)
 	r.GET("/History", paymentHandler.ShowHistory)
 	r.GET("/orders-by-name", paymentHandler.FindOrderByGame)
+	r.GET("/fail-orders", paymentHandler.ShowFailedOrder)
 	r.POST("/booking/:id", bookingHandler.CreateBooking)
 	r.POST("/order", paymentHandler.CreateOrder)
 	r.POST("/Login", adminHandler.Login)
