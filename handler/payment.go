@@ -492,8 +492,8 @@ func sendEmail(id string, gameName string, jenisPaket string, harga string) {
 		id, gameName, jenisPaket, harga)
 
 	m := gomail.NewMessage()
-	m.SetHeader("From", "grahagrent@gmail.com")
-	m.SetHeader("To", "aryaizra2@gmail.com")
+	m.SetHeader("From", os.Getenv("EMAIL"))
+	m.SetHeader("To", "ferdojc175@gmail.com")
 	m.SetHeader("Subject", subject)
 	m.SetBody("text/plain", body)
 
